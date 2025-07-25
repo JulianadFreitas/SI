@@ -146,7 +146,10 @@
     <h1>🍬 Painel de Chamados</h1>
     <div class="grid">
       {% for call in calls %}
-      <div class="card-call {% if call.status == 'Atendido' %}atendido{% endif %} {% if call.is_new %}novo-chamado{% endif %}">
+      <div class="card-call 
+        {% if call.status == 'Atendido' %}atendido{% endif %}
+        {% if call.status == 'Pendente' and call.is_new %} novo-chamado{% endif %}">
+
         <h4>Mesa {{ call.table_id }}</h4>
         <p><strong>🕒</strong> {{ call.time }}</p>
         <p class="text-muted small">
@@ -170,27 +173,30 @@
     const socket = io();
 
     socket.on('new_call', (data) => {
-      console.log('Novo chamado recebido:', data);
       const sound = document.getElementById("alertSound");
       if (sound) {
         sound.play().catch((e) => {
           console.warn("Som bloqueado até interação do usuário:", e);
         });
-      }
 
-      // Opcional: recarrega a página para mostrar novo card
-      location.reload();
+        // Aguarda 2 segundos antes de recarregar
+        setTimeout(() => {
+          location.reload();
+        }, 9000);
+      } else {
+        location.reload();
+      }
     });
 
     function ativarSom() {
       const sound = document.getElementById("alertSound");
       sound.play().then(() => {
         console.log("Som ativado");
+        time.sleep(5)
       }).catch(err => {
         console.warn("Não foi possível ativar som:", err);
       });
     }
   </script>
-
 </body>
 </html>

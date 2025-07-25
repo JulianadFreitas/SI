@@ -4,3 +4,4 @@ qrcode
 pillow
 flask-socketio
 eventlet
+flask_socketio

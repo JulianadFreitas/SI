@@ -1,6 +1,7 @@
 # from flask import Flask, render_template, redirect, url_for
 # from datetime import datetime
 # from models import db, Call
+import time
 
 # app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///calls.db'
@@ -82,15 +83,18 @@ def call(table_id):
 
     # Notifica todos os clientes conectados sobre novo chamado
     socketio.emit("new_call", {"table_id": table_id})
+    time.sleep(2)
     return render_template("call.html", table=table_id)
 
 @app.route('/kitchen')
 def kitchen():
     calls = Call.query.order_by(Call.id.desc()).all()
-    if calls:
-        calls[0].is_new = True
     now = datetime.utcnow()
+
+    # Marcar todos como não novos inicialmente
     for call in calls:
+        call.is_new = False
+        # Calcular tempo decorrido
         elapsed_seconds = (now - call.created_at).total_seconds()
         minutes = int(elapsed_seconds // 60)
         if minutes >= 60:
@@ -98,6 +102,11 @@ def kitchen():
             call.elapsed_str = f"{h}h {m}min"
         else:
             call.elapsed_str = f"{minutes} min"
+
+    # Marcar o último como novo, se ainda não atendido
+    if calls and calls[0].status == "Pendente":
+        calls[0].is_new = True
+
     return render_template('kitchen.html', calls=calls)
 
 @app.route("/attend/<int:call_id>")
@@ -124,3 +133,6 @@ def kitchen_length():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     socketio.run(app, host="0.0.0.0", port=port)
+
+# if __name__ == "__main__":
+#     socketio.run(app, debug=True)
