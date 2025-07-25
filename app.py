@@ -115,5 +115,12 @@ def kitchen_length():
     total = Call.query.count()
     return {"total": total}
 
+# if __name__ == "__main__":
+#     with app.app_context():
+#         db.create_all()
+#     socketio.run(app, host="0.0.0.0", port=8080)
+
+
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, host="0.0.0.0", port=port)
